@@ -1,22 +1,27 @@
-/// image8bit - A simple image processing module.
-///
-/// This module is part of a programming project
-/// for the course AED, DETI / UA.PT
-///
-/// You may freely use and modify this code, at your own risk,
-/// as long as you give proper credit to the original and subsequent authors.
-///
-/// João Manuel Rodrigues <jmr@ua.pt>
-/// 2013, 2023
+// INITIAL MESAGE: Project framework
+/*
+  image8bit - A simple image processing module.
 
-// Student authors (fill in below):
-// NMec:  Name:
-// 
-// 
-// 
-// Date:
-//
+    -> This module is part of a programming project for the course AED, DETI / UA.PT
 
+    -> You may freely use and modify this code, at your own risk,
+    as long as you give proper credit to the original and subsequent authors.
+
+    João Manuel Rodrigues <jmr@ua.pt>
+    2013, 2023
+*/
+
+// AUTHORS:
+/*
+
+  Student authors (fill in below):
+  NMec: 50458 | Name: João Pedro Nunes Vieira
+  
+  Date: November 24, 2023
+
+  Authors Note: For development purposes, all code and coments shall be writen in English
+*/
+// INCLUDES
 #include "image8bit.h"
 
 #include <assert.h>
@@ -26,21 +31,28 @@
 #include <stdlib.h>
 #include "instrumentation.h"
 
-// The data structure
-//
-// An image is stored in a structure containing 3 fields:
-// Two integers store the image width and height.
-// The other field is a pointer to an array that stores the 8-bit gray
-// level of each pixel in the image.  The pixel array is one-dimensional
-// and corresponds to a "raster scan" of the image from left to right,
-// top to bottom.
-// For example, in a 100-pixel wide image (img->width == 100),
-//   pixel position (x,y) = (33,0) is stored in img->pixel[33];
-//   pixel position (x,y) = (22,1) is stored in img->pixel[122].
-// 
-// Clients should use images only through variables of type Image,
-// which are pointers to the image structure, and should not access the
-// structure fields directly.
+
+
+// THE DATA STRUCTURE:
+/*
+  An image is stored in a structure containing 3 fields:
+    -> One field (integer) stores the image [Width]
+    -> One field (integer) stores the image [Height]
+    -> One field (pointer) points to an array that stores the 8-bit gray level of each pixel.  
+       NOTE: The pixel array is one-dimensional and corresponds to a "raster scan" 
+       of the image from left to right, top to bottom.
+
+  Examples: 100-pixel wide image (img->width == 100)
+    1.) Pixel position (x,y) = (33,0) is stored in img->pixel[33];
+    2.) Pixel position (x,y) = (22,1) is stored in img->pixel[122].
+
+  ###########################################################################################
+  !!! [WARNING] !!!
+  Clients should use images only through variables of type Image,
+  which are pointers to the image structure! Should NOT access the
+  structure fields directly!
+  ###########################################################################################
+*/ 
 
 // Maximum value you can store in a pixel (maximum maxval accepted)
 const uint8 PixMax = 255;
@@ -157,33 +169,84 @@ void ImageInit(void) { ///
 // TIP: Search for PIXMEM or InstrCount to see where it is incremented!
 
 
-/// Image management functions
 
-/// Create a new black image.
-///   width, height : the dimensions of the new image.
-///   maxval: the maximum gray level (corresponding to white).
-/// Requires: width and height must be non-negative, maxval > 0.
-/// 
-/// On success, a new image is returned.
-/// (The caller is responsible for destroying the returned image!)
-/// On failure, returns NULL and errno/errCause are set accordingly.
-Image ImageCreate(int width, int height, uint8 maxval) { ///
+
+
+
+
+
+
+
+// INICIATING WORK HERE ASK TEACHER SUGESTED:
+// ############################################################################
+// --------------------------
+// IMAGE MANAGEMENT FUNCTIONS
+// --- ImageCreate() --------
+/*
+  Creates a new black image.
+  
+    -> width, height  : the dimensions of the new image.
+    -> maxval         : the maximum gray level (corresponding to white).
+    -> Requires       : width and height must be non-negative, maxval > 0.
+ 
+  Results:
+  On success  : a new image is returned.
+  On failure  : returns NULL and errno/errCause are set accordingly.
+
+  Warning: (The caller is responsible for destroying the returned image!)
+*/
+Image ImageCreate(int width, int height, uint8 maxval) {
   assert (width >= 0);
   assert (height >= 0);
   assert (0 < maxval && maxval <= PixMax);
-  // Insert your code here!
-}
+  //
+  // Memory allocation for image structure (& failure errno)
+  struct image* newImage = (struct image*)malloc(sizeof(struct image));
+  if (newImage == NULL) {
+    errno = ENOMEM;
+    errCause = "Memory allocation has failed!";
+    return NULL;
+  }
 
-/// Destroy the image pointed to by (*imgp).
-///   imgp : address of an Image variable.
-/// If (*imgp)==NULL, no operation is performed.
-/// Ensures: (*imgp)==NULL.
-/// Should never fail, and should preserve global errno/errCause.
-void ImageDestroy(Image* imgp) { ///
+  newImage->width = width;
+  newImage->height = height;
+  newImage->maxval = maxval;
+  //
+  // Memory allocation for pixel data (& failure errno)
+  newImage->pixel = (uint8_t*)malloc(width*height*sizeof(uint8_t)); 
+  if (newImage->pixel == NULL) {
+    free(newImage);
+    errno = ENOMEM;
+    errCause = "Memory allocation for Pixel data has failed!";
+    return NULL;
+  }
+  //
+  // Initialize pixel data
+  for(int i = 0; i < width*height; i++){  }
+
+  return newImage;
+
+}
+// --------------------------
+// --- ImageDestroy() -------
+/*
+  Destroy the image pointed to by (*imgp).
+    -> imgp             : address of an Image variable.
+    -> If (*imgp)==NULL : no operation is performed.
+    -> Ensures          : (*imgp)==NULL.
+  
+  WARNING: should NEVER fail and should preserve global errno/errCause.
+*/
+void ImageDestroy(Image* imgp) {
   assert (imgp != NULL);
-  // Insert your code here!
+  if (*imgp != NULL) {
+    free((*imgp)->pixel); // Deallocate: pixel data
+    free(*imgp);          // Deallocate: image structure
+    *imgp = NULL;         // Image pointer = NULL (destroyed)
+  }
 }
-
+// ############################################################################
+// ############################################################################
 
 /// PGM file operations
 
